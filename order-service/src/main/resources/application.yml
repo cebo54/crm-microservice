@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: "order-service"
+
+  datasource:
+    url: "jdbc:postgresql://localhost:5433/order-service"
+    username: postgres
+    password: test
+  jpa:
+    properties:
+      hibarnate:
+        dialect: org.hibarnate.dialect.PostgreSQLDialect
+    showSql: true
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8085

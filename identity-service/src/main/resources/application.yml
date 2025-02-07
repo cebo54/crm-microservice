@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: "identity-service"
+
+  datasource:
+    url: "jdbc:postgresql://localhost:5434/identity-service"
+    username: postgres
+    password: test
+  jpa:
+    properties:
+      hibarnate:
+        dialect: org.hibarnate.dialect.PostgreSQLDialect
+    showSql: true
+    hibernate:
+      ddl-auto: update
+server:
+  port: 8083
