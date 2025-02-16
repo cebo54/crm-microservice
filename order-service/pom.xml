@@ -28,6 +28,8 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
     <dependencies>
@@ -83,7 +85,11 @@
             <artifactId>spring-cloud-starter-stream-kafka</artifactId>
             <version>4.2.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.cebo54</groupId>
+            <artifactId>common-t2</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
     </dependencies>
     <dependencyManagement>

@@ -18,13 +18,13 @@ spring:
 
 
   datasource:
-    url: "jdbc:postgresql://localhost:5433/order-service"
+    url: "jdbc:postgresql://order-service-db:5432/order-service"
     username: postgres
     password: test
   jpa:
     properties:
-      hibarnate:
-        dialect: org.hibarnate.dialect.PostgreSQLDialect
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     showSql: true
     hibernate:
       ddl-auto: update
@@ -35,6 +35,6 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: "http://localhost:8761/eureka/"
+      defaultZone: "http://discovery-server:8761/eureka/"
     register-with-eureka: true
     fetch-registry: true

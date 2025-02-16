@@ -1,7 +1,197 @@
+version: "3.8"
+
 services:
+
+  order-service-db:
+    image: postgres
+    container_name: "order-service-db"
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=postgres
+    volumes:
+      - order-service-db_data:/var/lib/postgresql/data
+    networks:
+      - common
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
+
+  identity-service-db:
+    image: postgres
+    container_name: "identity-service-db"
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=postgres
+    volumes:
+      - identity-service-db_data:/var/lib/postgresql/data
+    networks:
+      - common
+
+
+
+  product-service-db:
+    image: mongo
+    container_name: product-service-db
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_DATABASE: product-service
+    volumes:
+      - product-service-db_data:/data/db
+    networks:
+      - common
+
+  cart-service-db:
+    image: mongo
+    container_name: cart-service-db
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_DATABASE: cart-service
+    volumes:
+      - cart-service-db_data:/data/db
+    networks:
+      - common
+
+  customer-service-db:
+    image: mysql:8
+    container_name: customer-service-db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: test
+    volumes:
+      - customer-service-db_data:/var/lib/mysql
+    networks:
+      - common
+
+  discovery-server:
+    image: discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_CLIENT_FETCH_REGISTRY: false
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+    networks:
+      - common
+
+  gateway-server:
+    container_name: gateway-server
+    image: gateway-server
+    ports:
+      - "8080:8080"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+    depends_on:
+      - discovery-server
+    networks:
+      - common
+
+
+
+  cart-service:
+    image: cart-service
+    container_name: cart-service
+    ports:
+      - "8081:8081"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+      SPRING_DATA_MONGODB_URI: "mongodb://cart-service-db:27017/cart-service"
+    depends_on:
+      - discovery-server
+      - cart-service-db
+    networks:
+      - common
+
+  customer-service:
+    image: customer-service
+    container_name: customer-service
+    ports:
+      - "8082:8082"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: "jdbc:mysql://customer-service-db:3306/mydatabase"
+    depends_on:
+      - discovery-server
+      - customer-service-db
+    networks:
+      - common
+
+  identity-service:
+    image: identity-service
+    container_name: identity-service
+    ports:
+      - "8083:8083"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://identity-service-db:5432/identity-service"
+    depends_on:
+      - discovery-server
+      - identity-service-db
+    networks:
+      - common
+
+  notification-service:
+    image: notification-service
+    container_name: notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+    depends_on:
+      - discovery-server
+    networks:
+      - common
+
+
+
+  order-service:
+    image: order-service
+    container_name: order-service
+    ports:
+      - "8085:8085"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://order-service-db:5432/order-service"
+    depends_on:
+      discovery-server:
+        condition: service_started
+      order-service-db:
+        condition: service_healthy
+    networks:
+      - common
+
+  product-service:
+    image: product-service
+    container_name: product-service
+    ports:
+      - "8086:8086"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
+      SPRING_DATA_MONGODB_URI: "mongodb://product-service-db:27017/product-service"
+    depends_on:
+      - discovery-server
+      - product-service-db
+    networks:
+      - common
+
+
+
   kafka:
     image: bitnami/kafka
-    container_name: "kafka"
     ports:
       - "9092:9092"
     environment:
@@ -18,3 +208,15 @@ services:
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - BITNAMI_DEBUG=yes
       - KAFKA_CFG_NUM_PARTITIONS=2
+
+
+volumes:
+  order-service-db_data:
+  identity-service-db_data:
+  product-service-db_data:
+  cart-service-db_data:
+  customer-service-db_data:
+
+networks:
+  common:
+    driver: bridge
