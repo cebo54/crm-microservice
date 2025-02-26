@@ -1,0 +1,13 @@
+#persistence volume claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  labels:
+    app: postgres
+spec:
+  accessModes:
+    - ReadWriteOnce #pvc ve pv farkı -- accesmodelar nelerdir
+  resources:
+    requests:
+      storage: 5Gi

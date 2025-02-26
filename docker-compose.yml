@@ -45,8 +45,10 @@ services:
       - "27018:27017"
     environment:
       MONGO_INITDB_DATABASE: product-service
+      MONGO_INITDB_USERNAME: admin
+      MONGO_INITDB_PASSWORD: test
     volumes:
-      - product-service-db_data:/data/db
+      - product-service-db_data:/etc/mongo
     networks:
       - common
 
@@ -54,13 +56,15 @@ services:
     image: mongo
     container_name: cart-service-db
     ports:
-      - "27019:27017"
+      - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: cart-service
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
     volumes:
-      - cart-service-db_data:/data/db
+      - cart-service-db_data:/etc/mongo
     networks:
       - common
+
 
   customer-service-db:
     image: mysql:8
@@ -155,7 +159,6 @@ services:
       - discovery-server
     networks:
       - common
-
 
 
   order-service:
