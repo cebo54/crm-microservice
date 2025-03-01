@@ -19,7 +19,7 @@ services:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
       interval: 10s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
 
   identity-service-db:
@@ -104,6 +104,18 @@ services:
     networks:
       - common
 
+  config-server:
+    image: config-server
+    container_name: config-server
+    ports:
+      - "8089:8089"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8089/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
 
 
   cart-service:
@@ -167,12 +179,14 @@ services:
     ports:
       - "8085:8085"
     environment:
-      eureka.client.serviceUrl.defaultZone: http://discovery-server:8761/eureka
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://order-service-db:5432/order-service"
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8089
     depends_on:
       discovery-server:
         condition: service_started
       order-service-db:
+        condition: service_healthy
+      config-server:
         condition: service_healthy
     networks:
       - common

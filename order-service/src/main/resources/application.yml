@@ -1,40 +1,15 @@
 spring:
   application:
-    name: "order-service"
+    name: "orderservice"
   cloud:
-    stream:
-      defaultBinder: kafka
-      function:
-        definition: orderCreatedFunction
-      kafka:
-        binder:
-          brokers: localhost:9092
-      bindings:
-        orderCreatedFunction-out-0:
-          destination: order-topic
-          content-type: application/json
+    config:
+      profile: "local"
+  config:
+    import: "optional:configserver:http://localhost:8089"
 
 
 
 
-  datasource:
-    url: "jdbc:postgresql://order-service-db:5432/order-service"
-    username: postgres
-    password: test
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    showSql: true
-    hibernate:
-      ddl-auto: update
 
-server:
-  port: 8085
 
-eureka:
-  client:
-    service-url:
-      defaultZone: "http://discovery-server:8761/eureka/"
-    register-with-eureka: true
-    fetch-registry: true
+
